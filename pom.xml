@@ -21,6 +21,7 @@
 		<springcloud.version>Camden.SR6</springcloud.version>
 		<hadoop.version>2.8.0</hadoop.version>
 		<sqoop.version>1.99.7</sqoop.version>
+		<mysql.version>5.1.41</mysql.version>
 	</properties>
 
 
@@ -34,6 +35,7 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
 
 			<!-- Spring Cloud -->
 			<dependency>

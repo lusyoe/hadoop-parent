@@ -17,4 +17,11 @@ public class ToJobConfig {
      * Job输出格式
      */
     public static final String OUT_FORMAT = "toJobConfig.outputFormat";
+
+    /**
+     * 追加模式，输出目录可不为空
+     */
+    public static final String APPEND_MODE = "toJobConfig.appendMode";
+    
+    
 }
