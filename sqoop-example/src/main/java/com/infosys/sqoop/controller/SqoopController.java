@@ -5,6 +5,8 @@ import static com.infosys.hadoop.common.utils.Constants.MYSQL_DRIVER_STR;
 import static com.infosys.hadoop.common.utils.Constants.SQOOP2_GENERIC_CONNECTOR;
 import static com.infosys.hadoop.common.utils.Constants.SQOOP2_HDFS_CONNECTOR;
 
+import java.util.List;
+
 import org.apache.sqoop.client.SqoopClient;
 import org.apache.sqoop.client.SubmissionCallback;
 import org.apache.sqoop.model.MFromConfig;
@@ -36,7 +38,7 @@ public class SqoopController {
     private static final String JOB_NAME = "web-job";
     private static final String SOURCE_DB = "hadoopguide";
     private static final String SOURCE_TABLE = "widgets";
-    private static final String HDFS_OUTPUT = "/sqoop";
+    private static final String HDFS_OUTPUT = "/sqoop/out";
     
     
     @Value("${spring.datasource.username}")
@@ -75,6 +77,29 @@ public class SqoopController {
         return "SUCCESS";
     }
 
+    @RequestMapping(value = "/delAll", method = RequestMethod.GET)
+    public String delAllLinksAndJobs() throws Exception {
+
+        SqoopClient client = new SqoopClient(sqoopUrl);
+        
+        List<MJob> jobs = client.getJobs();
+
+        for (MJob job : jobs) {
+            
+            String jobName = job.getName();
+            MSubmission jobStatus = client.getJobStatus(jobName);
+            
+            if (jobStatus.getStatus().isRunning()) {
+                client.stopJob(jobName);
+            }
+        }
+        
+        client.deleteAllLinksAndJobs();
+        
+        return "SUCCESS";
+    }
+    
+    
     /**
      * 启动Job
      * @param client
@@ -131,6 +156,8 @@ public class SqoopController {
         MToConfig toJobConfig = job.getToJobConfig();
         
         toJobConfig.getStringInput(ToJobConfig.OUT_DIR).setValue(HDFS_OUTPUT);
+        
+        toJobConfig.getBooleanInput(ToJobConfig.APPEND_MODE).setValue(true);
         
         toJobConfig.getEnumInput(ToJobConfig.OUT_FORMAT).setValue(ToFormat.TEXT_FILE);
         
