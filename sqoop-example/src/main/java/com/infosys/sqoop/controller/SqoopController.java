@@ -39,14 +39,13 @@ public class SqoopController {
     private static final String SOURCE_DB = "hadoopguide";
     private static final String SOURCE_TABLE = "widgets";
     private static final String HDFS_OUTPUT = "/sqoop/out";
-    
-    
+
     @Value("${spring.datasource.username}")
     private String DB_USERNAME;
 
     @Value("${spring.datasource.password}")
     private String DB_PASSWD;
-    
+
     @Value("${sqoop.url}")
     private String sqoopUrl;
 
@@ -58,8 +57,6 @@ public class SqoopController {
 
     @Value("${hadoop.conf.dir}")
     private String hadoopConfDir;
-    
-    
 
     @RequestMapping(value = "/startJob", method = RequestMethod.GET)
     public String startJob() throws Exception {
@@ -69,11 +66,11 @@ public class SqoopController {
         configSourceLink(client);
 
         configDestLink(client);
-        
+
         configJob(client);
 
         startJob(client);
-        
+
         return "SUCCESS";
     }
 
@@ -81,92 +78,96 @@ public class SqoopController {
     public String delAllLinksAndJobs() throws Exception {
 
         SqoopClient client = new SqoopClient(sqoopUrl);
-        
+
         List<MJob> jobs = client.getJobs();
 
         for (MJob job : jobs) {
-            
+
             String jobName = job.getName();
             MSubmission jobStatus = client.getJobStatus(jobName);
-            
+
             if (jobStatus.getStatus().isRunning()) {
                 client.stopJob(jobName);
             }
         }
-        
+
         client.deleteAllLinksAndJobs();
-        
+
         return "SUCCESS";
     }
-    
-    
+
     /**
      * 启动Job
+     * 
      * @param client
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
     private void startJob(SqoopClient client) throws InterruptedException {
-        
+
         // 启动Job并设置回调
         MSubmission submission = client.startJob(JOB_NAME, DEFAULT_SUBMISSION_CALLBACKS, 100);
-        
+
         if (submission.getStatus().isFailure()) {
             log.error("Submission has failed:" + submission.getError().getErrorSummary());
             log.error("Corresponding error details: " + submission.getError().getErrorDetails());
         }
     }
-    
+
     protected static final SubmissionCallback DEFAULT_SUBMISSION_CALLBACKS = new SubmissionCallback() {
+
         @Override
         public void submitted(MSubmission submission) {
+
             log.info("Submission submitted: " + submission);
         }
 
         @Override
         public void updated(MSubmission submission) {
+
             log.info("Submission updated: " + submission);
         }
 
         @Override
         public void finished(MSubmission submission) {
+
             log.info("Submission finished: " + submission);
         }
     };
 
-
     /**
      * 配置Job
+     * 
      * @param client
      */
     private void configJob(SqoopClient client) {
-        
+
         MJob job = client.createJob(fromLinkName, toLinkName);
         job.setName(JOB_NAME);
-        
+
         MFromConfig fromJobConfig = job.getFromJobConfig();
-        
+
         // 配置源数据库
         fromJobConfig.getStringInput(FromJobConfig.SCHEMA_NAME).setValue(SOURCE_DB);
-        
+
         fromJobConfig.getStringInput(FromJobConfig.TABLE_NAME).setValue(SOURCE_TABLE);
-        
+
         fromJobConfig.getStringInput(FromJobConfig.PARITITION_COLUMN).setValue("id");
-        
+
         // 配置目标Job
         MToConfig toJobConfig = job.getToJobConfig();
-        
+
         toJobConfig.getStringInput(ToJobConfig.OUT_DIR).setValue(HDFS_OUTPUT);
-        
+
         toJobConfig.getBooleanInput(ToJobConfig.APPEND_MODE).setValue(true);
-        
+
         toJobConfig.getEnumInput(ToJobConfig.OUT_FORMAT).setValue(ToFormat.TEXT_FILE);
-        
+
         client.saveJob(job);
     }
 
-    
     /**
      * 配置目标链接
+     * 
      * @param client
      */
     private void configDestLink(SqoopClient client) {
@@ -186,11 +187,10 @@ public class SqoopController {
             log.debug("Something went wrong creating the Dest link");
         }
     }
-    
-    
 
     /**
      * 配置源链接
+     * 
      * @param client
      */
     private void configSourceLink(SqoopClient client) {
