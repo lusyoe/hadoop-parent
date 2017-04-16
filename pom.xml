@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.infosys.hadoop</groupId>
@@ -20,7 +21,8 @@
 		<springcloud.version>Camden.SR6</springcloud.version>
 		<hadoop.version>2.8.0</hadoop.version>
 		<sqoop.version>1.99.7</sqoop.version>
-		<mysql.version>5.1.41</mysql.version>
+		<oozie.version>4.3.0</oozie.version>
+		<mysql.version>5.1.29</mysql.version>
 	</properties>
 
 
@@ -77,8 +79,21 @@
 				</exclusions>
 			</dependency>
 
+			<!-- Oozie -->
+			<dependency>
+				<groupId>org.apache.oozie</groupId>
+				<artifactId>oozie-client</artifactId>
+				<version>${oozie.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-simple</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			
 
-			<!-- child module -->
+			<!-- child modules -->
 			<dependency>
 				<groupId>com.infosys.hadoop</groupId>
 				<artifactId>hadoop-domain</artifactId>
@@ -138,6 +153,6 @@
 		<module>hadoop-domain</module>
 		<module>hadoop-common</module>
 		<module>sqoop-example</module>
-    <module>oozie-example</module>
-  </modules>
+		<module>oozie-example</module>
+	</modules>
 </project>

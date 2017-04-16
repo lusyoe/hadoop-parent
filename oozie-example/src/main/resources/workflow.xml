@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow-app name="mysqoopAction" xmlns="uri:oozie:workflow:0.1">
+
+	<start to="mysqoopAction" />
+	<action name="mysqoopAction">
+		<sqoop xmlns="uri:oozie:sqoop-action:0.3">
+			<job-tracker>${jobTracker}</job-tracker>
+			<name-node>${nameNode}</name-node>
+			<prepare>
+				<delete path="${nameNode}/user/${wf:user()}/output-data/sqoop-test"/>
+                <mkdir path="${nameNode}/user/${wf:user()}/output-data"/>
+			</prepare>
+
+
+			<arg>import</arg>
+			<arg>--connect</arg>
+			<arg>jdbc:mysql://192.168.1.2:3306/oozie_test</arg>
+			<arg>--username</arg>
+			<arg>${dbUserName}</arg>
+			<arg>--password</arg>
+			<arg>${dbPassword}</arg>
+			<arg>--table</arg>
+			<arg>temp</arg>
+			<arg>--target-dir</arg>
+			<arg>${nameNode}/user/${wf:user()}/output-data/sqoop-test</arg>
+			<arg>--verbose</arg>
+			<arg>--direct</arg>
+			<arg>-m</arg>
+			<arg>1</arg>
+		</sqoop>
+
+		<ok to="end" />
+		<error to="killJob" />
+	</action>
+
+	<kill name="killJob">
+		<message>"Killed job due to error:
+			${wf:errorMessage(wf:lastErrorNode())}"</message>
+	</kill>
+	<end name="end" />
+</workflow-app>
