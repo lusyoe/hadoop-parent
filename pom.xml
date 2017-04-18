@@ -23,6 +23,8 @@
 		<sqoop.version>1.99.7</sqoop.version>
 		<oozie.version>4.3.0</oozie.version>
 		<mysql.version>5.1.29</mysql.version>
+
+		<hadoop.version>2.7.3</hadoop.version>
 	</properties>
 
 
@@ -91,7 +93,7 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-			
+
 
 			<!-- child modules -->
 			<dependency>
