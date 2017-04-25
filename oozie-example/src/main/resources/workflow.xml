@@ -1,18 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<workflow-app name="mysqoopWf" xmlns="uri:oozie:workflow:0.1">
+<workflow-app name="mysqoopWf" xmlns="uri:oozie:workflow:0.5">
 
-	<start to="mysqoopAction" />
+	<start to="timeCheck" />
+	
+	<action name="timeCheck">
+		<shell xmlns="uri:oozie:shell-action:0.3">
+			<job-tracker>${jobTracker}</job-tracker>
+			<name-node>${nameNode}</name-node>
+			
+			<exec>echo</exec>
+			<argument>sqoopLastValue=2017-04-25 21:00</argument>
+			<capture-output/>
+		</shell>
+		
+		<ok to="mysqoopAction"/>
+		<error to="killJob"/>
+	</action>
+	
 	<action name="mysqoopAction">
 		<sqoop xmlns="uri:oozie:sqoop-action:0.3">
 			<job-tracker>${jobTracker}</job-tracker>
 			<name-node>${nameNode}</name-node>
-			<prepare>
-				<delete path="${nameNode}/user/${wf:user()}/output-data/sqoop-test"/>
-                <mkdir path="${nameNode}/user/${wf:user()}/output-data"/>
-			</prepare>
-
 
 			<arg>import</arg>
+			<arg>--append</arg>
 			<arg>--connect</arg>
 			<arg>jdbc:mysql://192.168.1.2:3306/oozie_test</arg>
 			<arg>--username</arg>
@@ -22,9 +33,14 @@
 			<arg>--table</arg>
 			<arg>temp</arg>
 			<arg>--target-dir</arg>
-			<arg>${nameNode}/user/${wf:user()}/output-data/sqoop-test</arg>
+			<arg>${outDir}</arg>
+			<arg>--incremental</arg>
+			<arg>lastmodified</arg>
+			<arg>--check-column</arg>
+			<arg>update_time</arg>
+			<arg>--last-value</arg>
+			<arg>${wf:actionData('timeCheck')['sqoopLastValue']}</arg>
 			<arg>--verbose</arg>
-			<arg>--direct</arg>
 			<arg>-m</arg>
 			<arg>1</arg>
 		</sqoop>
@@ -34,7 +50,7 @@
 	</action>
 
 	<kill name="killJob">
-		<message>"Killed job due to error:
+		<message>"${wf:id()} job due to error:
 			${wf:errorMessage(wf:lastErrorNode())}"</message>
 	</kill>
 	<end name="end" />

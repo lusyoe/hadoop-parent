@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coordinator-app name="test-coord" frequency="${coord:minutes(5)}"
+	start="${start}" end="${end}" timezone="UTC" xmlns="uri:oozie:coordinator:0.5">
+
+	<action>
+		<workflow>
+			<app-path>${workflowApp}</app-path>
+			<configuration>
+				<property>
+					<name>jobTracker</name>
+					<value>${jobTracker}</value>
+				</property>
+				<property>
+					<name>nameNode</name>
+					<value>${nameNode}</value>
+				</property>
+				<property>
+					<name>queueName</name>
+					<value>default</value>
+				</property>
+			</configuration>
+		</workflow>
+	</action>
+</coordinator-app>

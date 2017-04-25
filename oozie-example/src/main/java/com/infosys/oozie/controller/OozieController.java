@@ -25,8 +25,8 @@ public class OozieController {
     @Value("${oozie.url}")
     private String oozieUrl;
 
-    // @Value("${oozie.app.path}")
-    // private String appPath;
+     @Value("${oozie.app.path}")
+     private String appPath;
 
     @Value("${oozie.job.tracker}")
     private String jobTracker;
@@ -40,14 +40,20 @@ public class OozieController {
     @Value("${hadoop.url}")
     private String hdfsUrl;
 
-    @Value("${oozie.queue.name}")
-    private String queueName;
+//    @Value("${oozie.queue.name}")
+//    private String queueName;
 
     @Value("${spring.datasource.username}")
     private String dbUserName;
 
     @Value("${spring.datasource.password}")
     private String dbPassword;
+
+    @Value("${oozie.coord.start}")
+    private String startTime;
+
+    @Value("${oozie.coord.end}")
+    private String endTime;
 
     @RequestMapping(value = "/initStart")
     public String initStartJob() throws OozieClientException, InterruptedException {
@@ -65,7 +71,7 @@ public class OozieController {
         // 设置workflow 参数
         conf.setProperty("jobTracker", jobTracker);
         conf.setProperty("nameNode", hdfsUrl);
-        conf.setProperty("queueName", queueName);
+//        conf.setProperty("queueName", queueName);
 
         // conf.setProperty("oozie.libpath", oozieLibPath);
         // conf.setProperty("oozie.wf.rerun.failnodes", "true");
@@ -98,6 +104,33 @@ public class OozieController {
 
         oozieClient.kill(jobId);
 
+        return "SUCCESS";
+    }
+    
+    @GetMapping(value = "/startCoord")
+    public String startCoord() throws OozieClientException {
+        OozieClient oozieClient = new OozieClient(oozieUrl);
+        oozieClient.setDebugMode(DEBUG_ON);
+        
+        Properties conf = oozieClient.createConfiguration();
+        
+        conf.setProperty("jobTracker", jobTracker);
+        conf.setProperty("nameNode", hdfsUrl);
+        
+        conf.setProperty("dbUserName", dbUserName);
+        conf.setProperty("dbPassword", dbPassword);
+        
+        conf.setProperty("outDir", outputDir);
+        conf.setProperty(OozieClient.COORDINATOR_APP_PATH, appPath);
+        conf.setProperty("workflowApp", appPath);
+//        conf.setProperty(OozieClient.APP_PATH, appPath);
+        
+        conf.setProperty("start", startTime);
+        conf.setProperty("end", endTime);
+        
+        
+        oozieClient.run(conf);
+        
         return "SUCCESS";
     }
 }
